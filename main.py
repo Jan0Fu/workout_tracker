@@ -1,8 +1,10 @@
 import requests
 from datetime import datetime
+import os
 
-APP_ID = "d5dea061"
-API_KEY = "7f7127f4e3df0448207a618a1c763da1"
+APP_ID = os.environ["WT_APP_ID"]
+API_KEY = os.environ["WT_API_KEY"]
+
 GENDER = "male"
 AGE = 34
 WEIGHT_KG = 73
@@ -14,7 +16,7 @@ header = {
 }
 
 exercise_endpoint = "https://trackapi.nutritionix.com/v2/natural/exercise"
-sheet_endpoint = "https://api.sheety.co/23ff215de00c02d57c638f6c122e212d/myWorkouts/workouts"
+SHEET_ENDPOINT = os.environ["WT_SHEET_ENDPOINT"]
 input_text = input("Tell me which exercises you did: ")
 
 params = {
@@ -27,9 +29,14 @@ params = {
 
 response = requests.post(url=exercise_endpoint, json=params, headers=header)
 result = response.json()
+print(result)
 
 today_date = datetime.now().strftime("%d%m%Y")
 now_time = datetime.now().strftime("%X")
+
+bearer_headers = {
+    "Authorization": f"Bearer {os.environ['WT_TOKEN']}"
+}
 
 for exercise in result["exercises"]:
     sheet_inputs = {
@@ -41,4 +48,4 @@ for exercise in result["exercises"]:
             "calories": exercise["nf_calories"]
         }
     }
-    sheet_response = requests.post(sheet_endpoint, json=sheet_inputs)
+    sheet_response = requests.post(SHEET_ENDPOINT, json=sheet_inputs, headers=bearer_headers)
